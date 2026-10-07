@@ -1,0 +1,88 @@
+@import "katex/dist/katex.min.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+.dark {
+  --background: #090d16;
+  --foreground: #f8fafc;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Table Styles in Exam and Editor */
+.cbt-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+}
+
+.cbt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.cbt-table th {
+  background-color: #f1f5f9;
+  font-weight: 600;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #cbd5e1;
+}
+
+.dark .cbt-table th {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.cbt-table td {
+  padding: 0.5rem 0.875rem;
+  border: 1px solid #e2e8f0;
+}
+
+.dark .cbt-table td {
+  border-color: #334155;
+}
+
+.cbt-table tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.dark .cbt-table tr:nth-child(even) {
+  background-color: #0f172a;
+}
+
+/* KaTeX custom sizing tweaks */
+.katex {
+  font-size: 1.05em !important;
+}
+
+.katex-display {
+  margin: 0.75em 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}
+
+/* Hide scrollbar for clean horizontal tabs/badges */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
