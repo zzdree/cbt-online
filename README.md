@@ -1,5 +1,8 @@
 # CBT Online — Sistem Ujian Online Berbasis Web
 
+> 🌐 **Live Demo Cloudflare**: [https://cbt-online.zzdree.workers.dev](https://cbt-online.zzdree.workers.dev)  
+> 📦 **GitHub Repository**: [https://github.com/zzdree/cbt-online](https://github.com/zzdree/cbt-online)
+
 Sistem Ujian Online Berbasis Komputer (CBT / Computer-Based Test) modern yang responsif di desktop maupun smartphone, dilengkapi sistem integritas anti-cheat dengan penalti **lockout 30 detik kebal refresh**, editor soal kaya fitur (rumus matematika KaTeX, generator tabel, dan upload gambar), generator soal otomatis menggunakan AI (**KiosAPI DeepSeek / GPT**), serta pengaturan visibilitas nilai oleh guru.
 
 ---

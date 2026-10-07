@@ -33,6 +33,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# cloudflare open-next
+/.open-next/
+/.wrangler/
+
 # SQLite Database (uncomment if you want local db excluded from git)
 # cbt.db
 # cbt.db-journal

@@ -1,25 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 
-// POST /api/student/submit — grade answers, finalize attempt, return result per visibility setting
 export async function POST(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getDb();
     const { attempt_id } = await req.json();
 
     if (!attempt_id) {
       return NextResponse.json({ error: 'attempt_id wajib diisi' }, { status: 400 });
     }
 
-    const attempt = db.prepare('SELECT * FROM exam_attempts WHERE id = ?').get(attempt_id) as any;
+    const attempt = (await db.prepare('SELECT * FROM exam_attempts WHERE id = ?').get(attempt_id)) as any;
     if (!attempt) {
       return NextResponse.json({ error: 'Sesi ujian tidak ditemukan' }, { status: 404 });
     }
 
-    const exam = db.prepare('SELECT * FROM exams WHERE id = ?').get(attempt.exam_id) as any;
+    const exam = (await db.prepare('SELECT * FROM exams WHERE id = ?').get(attempt.exam_id)) as any;
 
     if (attempt.status === 'submitted') {
-      // Idempotent: return existing result
       return NextResponse.json({
         success: true,
         already_submitted: true,
@@ -30,14 +28,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Grade: fetch all questions with correct options
-    const questions = db
+    const questions = (await db
       .prepare('SELECT * FROM questions WHERE exam_id = ?')
-      .all(attempt.exam_id) as any[];
+      .all(attempt.exam_id)) as any[];
 
-    const answers = db
+    const answers = (await db
       .prepare('SELECT * FROM attempt_answers WHERE attempt_id = ?')
-      .all(attempt_id) as any[];
+      .all(attempt_id)) as any[];
 
     const answersMap: Record<string, any> = {};
     for (const a of answers) answersMap[a.question_id] = a;
@@ -54,9 +51,9 @@ export async function POST(req: NextRequest) {
       const points = q.points || 10;
       totalPossible += points;
 
-      const correctOption = db
+      const correctOption = (await db
         .prepare('SELECT id FROM question_options WHERE question_id = ? AND is_correct = 1')
-        .get(q.id) as any;
+        .get(q.id)) as any;
 
       const studentAnswer = answersMap[q.id];
       const selectedId = studentAnswer?.selected_option_id || null;
@@ -91,7 +88,7 @@ export async function POST(req: NextRequest) {
       now.getHours()
     )}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
-    db.prepare(
+    await db.prepare(
       `UPDATE exam_attempts
        SET status = 'submitted', submit_time = ?, score = ?, is_passed = ?, lockout_until = NULL
        WHERE id = ?`
@@ -121,28 +118,28 @@ export async function POST(req: NextRequest) {
       response.score = normalizedScore;
       response.is_passed = isPassed;
       if (showReview) {
-        // Return review data with explanations
-        const review = breakdown.map((b) => {
-          const q = questions.find((qq) => qq.id === b.question_id)!;
-          const options = db
-            .prepare('SELECT id, option_key, option_text, image_url FROM question_options WHERE question_id = ? ORDER BY option_key ASC')
-            .all(b.question_id);
-          const correctOpt = db
-            .prepare('SELECT option_key FROM question_options WHERE question_id = ? AND is_correct = 1')
-            .get(b.question_id) as any;
-          return {
-            ...b,
-            question_text: q.question_text,
-            points: q.points,
-            explanation: showReview ? q.explanation : null,
-            options,
-            correct_key: correctOpt?.option_key || null,
-          };
-        });
+        const review = await Promise.all(
+          breakdown.map(async (b) => {
+            const q = questions.find((qq) => qq.id === b.question_id)!;
+            const options = await db
+              .prepare('SELECT id, option_key, option_text, image_url FROM question_options WHERE question_id = ? ORDER BY option_key ASC')
+              .all(b.question_id);
+            const correctOpt = (await db
+              .prepare('SELECT option_key FROM question_options WHERE question_id = ? AND is_correct = 1')
+              .get(b.question_id)) as any;
+            return {
+              ...b,
+              question_text: q.question_text,
+              points: q.points,
+              explanation: showReview ? q.explanation : null,
+              options,
+              correct_key: correctOpt?.option_key || null,
+            };
+          })
+        );
         response.review = review;
       }
     } else {
-      // Score intentionally hidden from student
       response.score = null;
       response.is_passed = null;
     }

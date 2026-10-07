@@ -2,10 +2,10 @@ import { getDb } from '@/lib/db';
 import { AIQuestionRequest, DraftQuestion } from '@/types';
 
 export async function getKiosApiConfig() {
-  const db = getDb();
-  const apiKeyRow = db.prepare("SELECT value FROM settings WHERE key = 'kiosapi_key'").get() as { value: string } | undefined;
-  const baseUrlRow = db.prepare("SELECT value FROM settings WHERE key = 'kiosapi_base_url'").get() as { value: string } | undefined;
-  const modelRow = db.prepare("SELECT value FROM settings WHERE key = 'kiosapi_model'").get() as { value: string } | undefined;
+  const db = await getDb();
+  const apiKeyRow = await db.prepare("SELECT value FROM settings WHERE key = 'kiosapi_key'").get<{ value: string }>();
+  const baseUrlRow = await db.prepare("SELECT value FROM settings WHERE key = 'kiosapi_base_url'").get<{ value: string }>();
+  const modelRow = await db.prepare("SELECT value FROM settings WHERE key = 'kiosapi_model'").get<{ value: string }>();
 
   return {
     apiKey: apiKeyRow?.value || process.env.KIOSAPI_API_KEY || '',
@@ -66,7 +66,6 @@ Format JSON yang WAJIB dihasilkan:
   ]
 }`;
 
-  // Call KiosAPI via OpenAI-compatible endpoint
   const endpoint = `${config.baseUrl.replace(/\/+$/, '')}/chat/completions`;
 
   const response = await fetch(endpoint, {
@@ -94,7 +93,6 @@ Format JSON yang WAJIB dihasilkan:
   const json = await response.json();
   const rawContent = json.choices?.[0]?.message?.content || '{}';
 
-  // Parse JSON output safely
   let cleanJson = rawContent.trim();
   if (cleanJson.startsWith('```json')) {
     cleanJson = cleanJson.replace(/^```json/, '').replace(/```$/, '').trim();
@@ -112,7 +110,7 @@ Format JSON yang WAJIB dihasilkan:
       question_text: q.question_text || '',
       points: q.points || 10,
       explanation: q.explanation || '',
-      selected: true, // checked by default
+      selected: true,
       options: (q.options || []).map((opt: any) => ({
         key: opt.key?.toUpperCase(),
         text: opt.text || '',

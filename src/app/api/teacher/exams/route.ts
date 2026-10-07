@@ -13,8 +13,8 @@ function generateToken(): string {
 
 export async function GET() {
   try {
-    const db = getDb();
-    const exams = db
+    const db = await getDb();
+    const exams = await db
       .prepare(
         `SELECT e.*, (SELECT COUNT(*) FROM questions q WHERE q.exam_id = e.id) as question_count
          FROM exams e ORDER BY e.created_at DESC`
@@ -28,7 +28,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getDb();
     const body = await req.json();
 
     const {
@@ -49,11 +49,10 @@ export async function POST(req: NextRequest) {
     const id = `exam_${crypto.randomUUID().slice(0, 8)}`;
     let token = body.token || generateToken();
 
-    // Ensure token uniqueness
-    const existing = db.prepare('SELECT id FROM exams WHERE token = ?').get(token);
+    const existing = await db.prepare('SELECT id FROM exams WHERE token = ?').get(token);
     if (existing) token = generateToken();
 
-    db.prepare(
+    await db.prepare(
       `INSERT INTO exams (id, teacher_id, title, subject, token, duration_minutes, passing_grade,
         show_score_immediately, show_review_immediately, randomize_questions, randomize_options, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`
@@ -79,7 +78,7 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getDb();
     const body = await req.json();
     const { id, ...updates } = body;
 
@@ -116,7 +115,7 @@ export async function PUT(req: NextRequest) {
     }
 
     values.push(id);
-    db.prepare(`UPDATE exams SET ${setClauses.join(', ')} WHERE id = ?`).run(...values);
+    await db.prepare(`UPDATE exams SET ${setClauses.join(', ')} WHERE id = ?`).run(...values);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
@@ -126,7 +125,7 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getDb();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 
@@ -134,7 +133,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'ID ujian wajib diisi' }, { status: 400 });
     }
 
-    db.prepare('DELETE FROM exams WHERE id = ?').run(id);
+    await db.prepare('DELETE FROM exams WHERE id = ?').run(id);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

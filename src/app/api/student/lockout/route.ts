@@ -4,17 +4,23 @@ import crypto from 'node:crypto';
 
 const LOCKOUT_SECONDS = 30;
 
-// POST /api/student/lockout — record violation & activate 30s lockout
+function formatDbTime(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(
+    d.getMinutes()
+  )}:${pad(d.getSeconds())}`;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getDb();
     const { attempt_id, violation_type } = await req.json();
 
     if (!attempt_id) {
       return NextResponse.json({ error: 'attempt_id wajib diisi' }, { status: 400 });
     }
 
-    const attempt = db.prepare('SELECT * FROM exam_attempts WHERE id = ?').get(attempt_id) as any;
+    const attempt = (await db.prepare('SELECT * FROM exam_attempts WHERE id = ?').get(attempt_id)) as any;
 
     if (!attempt) {
       return NextResponse.json({ error: 'Sesi ujian tidak ditemukan' }, { status: 404 });
@@ -26,7 +32,6 @@ export async function POST(req: NextRequest) {
 
     const now = new Date();
 
-    // If already locked, keep existing lockout_until (don't extend, don't restart on spam)
     let lockoutUntil: Date;
     const isAlreadyLocked =
       attempt.lockout_until &&
@@ -37,14 +42,13 @@ export async function POST(req: NextRequest) {
     } else {
       lockoutUntil = new Date(now.getTime() + LOCKOUT_SECONDS * 1000);
 
-      // Only count a NEW violation when lockout actually starts fresh
-      db.prepare(
+      await db.prepare(
         `UPDATE exam_attempts
          SET lockout_until = ?, violation_count = violation_count + 1, status = 'locked'
          WHERE id = ?`
       ).run(formatDbTime(lockoutUntil), attempt_id);
 
-      db.prepare(
+      await db.prepare(
         'INSERT INTO violation_logs (id, attempt_id, violation_type, duration_seconds) VALUES (?, ?, ?, ?)'
       ).run(
         `vlog_${crypto.randomUUID().slice(0, 8)}`,
@@ -55,25 +59,17 @@ export async function POST(req: NextRequest) {
     }
 
     const remaining = Math.max(0, Math.ceil((lockoutUntil.getTime() - now.getTime()) / 1000));
-    const freshCount = (
-      db.prepare('SELECT violation_count FROM exam_attempts WHERE id = ?').get(attempt_id) as any
-    ).violation_count;
+    const freshAttempt = (await db
+      .prepare('SELECT violation_count FROM exam_attempts WHERE id = ?')
+      .get(attempt_id)) as any;
 
     return NextResponse.json({
       status: 'locked',
       lockout_until: formatDbTime(lockoutUntil),
       remaining_seconds: remaining,
-      violation_count: freshCount,
+      violation_count: freshAttempt?.violation_count || 1,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
-
-function formatDbTime(d: Date): string {
-  // SQLite-friendly "YYYY-MM-DD HH:MM:SS" in LOCAL time
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(
-    d.getMinutes()
-  )}:${pad(d.getSeconds())}`;
 }

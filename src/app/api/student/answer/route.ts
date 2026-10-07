@@ -2,17 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import crypto from 'node:crypto';
 
-// POST /api/student/answer — auto-save single answer (idempotent upsert)
 export async function POST(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getDb();
     const { attempt_id, question_id, selected_option_id, is_hesitant } = await req.json();
 
     if (!attempt_id || !question_id) {
       return NextResponse.json({ error: 'attempt_id dan question_id wajib diisi' }, { status: 400 });
     }
 
-    const attempt = db.prepare('SELECT * FROM exam_attempts WHERE id = ?').get(attempt_id) as any;
+    const attempt = (await db.prepare('SELECT * FROM exam_attempts WHERE id = ?').get(attempt_id)) as any;
     if (!attempt) {
       return NextResponse.json({ error: 'Sesi ujian tidak ditemukan' }, { status: 404 });
     }
@@ -20,12 +19,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Ujian sudah selesai' }, { status: 400 });
     }
 
-    const existing = db
+    const existing = await db
       .prepare('SELECT id FROM attempt_answers WHERE attempt_id = ? AND question_id = ?')
       .get(attempt_id, question_id);
 
     if (existing) {
-      db.prepare(
+      await db.prepare(
         `UPDATE attempt_answers
          SET selected_option_id = ?, is_hesitant = ?, updated_at = datetime('now', 'localtime')
          WHERE attempt_id = ? AND question_id = ?`
@@ -36,7 +35,7 @@ export async function POST(req: NextRequest) {
         question_id
       );
     } else {
-      db.prepare(
+      await db.prepare(
         `INSERT INTO attempt_answers (id, attempt_id, question_id, selected_option_id, is_hesitant)
          VALUES (?, ?, ?, ?, ?)`
       ).run(

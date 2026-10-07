@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 
-// GET /api/student/state?attempt_id=xxx
-// Used on page load/refresh to restore exam state INCLUDING active lockout (anti-refresh protection)
 export async function GET(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getDb();
     const { searchParams } = new URL(req.url);
     const attemptId = searchParams.get('attempt_id');
 
@@ -13,17 +11,16 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'attempt_id wajib diisi' }, { status: 400 });
     }
 
-    const attempt = db
+    const attempt = (await db
       .prepare('SELECT * FROM exam_attempts WHERE id = ?')
-      .get(attemptId) as any;
+      .get(attemptId)) as any;
 
     if (!attempt) {
       return NextResponse.json({ error: 'Sesi ujian tidak ditemukan' }, { status: 404 });
     }
 
-    const exam = db.prepare('SELECT * FROM exams WHERE id = ?').get(attempt.exam_id) as any;
+    const exam = (await db.prepare('SELECT * FROM exams WHERE id = ?').get(attempt.exam_id)) as any;
 
-    // If already submitted, redirect info
     if (attempt.status === 'submitted') {
       return NextResponse.json({
         success: true,
@@ -45,48 +42,45 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Compute time remaining (seconds) based on start_time + duration
     const startTime = new Date(attempt.start_time.replace(' ', 'T')).getTime();
     const durationMs = exam.duration_minutes * 60 * 1000;
     const endTimestamp = startTime + durationMs;
     const nowMs = Date.now();
     const remainingSeconds = Math.max(0, Math.floor((endTimestamp - nowMs) / 1000));
 
-    // Lockout status (anti-refresh: server is the source of truth)
     let lockoutRemaining = 0;
     if (attempt.lockout_until) {
       const lockoutUntilMs = new Date(attempt.lockout_until.replace(' ', 'T')).getTime();
       lockoutRemaining = Math.max(0, Math.ceil((lockoutUntilMs - nowMs) / 1000));
       if (lockoutRemaining === 0) {
-        // Lockout expired — clear it
-        db.prepare(
+        await db.prepare(
           "UPDATE exam_attempts SET lockout_until = NULL, status = 'in_progress' WHERE id = ?"
         ).run(attemptId);
       } else {
-        db.prepare("UPDATE exam_attempts SET status = 'locked' WHERE id = ?").run(attemptId);
+        await db.prepare("UPDATE exam_attempts SET status = 'locked' WHERE id = ?").run(attemptId);
       }
     }
 
-    // Load questions WITHOUT correct answers
-    const questions = db
+    const questions = (await db
       .prepare(
         'SELECT id, order_index, question_text, image_url, points FROM questions WHERE exam_id = ? ORDER BY order_index ASC'
       )
-      .all(attempt.exam_id) as any[];
+      .all(attempt.exam_id)) as any[];
 
-    const questionsWithOptions = questions.map((q) => {
-      const options = db
-        .prepare(
-          'SELECT id, option_key, option_text, image_url FROM question_options WHERE question_id = ? ORDER BY option_key ASC'
-        )
-        .all(q.id) as any[];
-      return { ...q, options };
-    });
+    const questionsWithOptions = await Promise.all(
+      questions.map(async (q) => {
+        const options = (await db
+          .prepare(
+            'SELECT id, option_key, option_text, image_url FROM question_options WHERE question_id = ? ORDER BY option_key ASC'
+          )
+          .all(q.id)) as any[];
+        return { ...q, options };
+      })
+    );
 
-    // Load existing answers
-    const answers = db
+    const answers = (await db
       .prepare('SELECT * FROM attempt_answers WHERE attempt_id = ?')
-      .all(attemptId) as any[];
+      .all(attemptId)) as any[];
 
     const answersMap: Record<string, { selected_option_id: string | null; is_hesitant: number }> = {};
     for (const a of answers) {

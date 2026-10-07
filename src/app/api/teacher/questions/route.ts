@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 
 export async function GET(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getDb();
     const { searchParams } = new URL(req.url);
     const examId = searchParams.get('exam_id');
 
@@ -12,16 +12,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'exam_id wajib diisi' }, { status: 400 });
     }
 
-    const questions = db
+    const questions = (await db
       .prepare('SELECT * FROM questions WHERE exam_id = ? ORDER BY order_index ASC')
-      .all(examId) as any[];
+      .all(examId)) as any[];
 
-    const result = questions.map((q) => {
-      const options = db
-        .prepare('SELECT * FROM question_options WHERE question_id = ? ORDER BY option_key ASC')
-        .all(q.id);
-      return { ...q, options };
-    });
+    const result = await Promise.all(
+      questions.map(async (q) => {
+        const options = await db
+          .prepare('SELECT * FROM question_options WHERE question_id = ? ORDER BY option_key ASC')
+          .all(q.id);
+        return { ...q, options };
+      })
+    );
 
     return NextResponse.json({ questions: result });
   } catch (error: any) {
@@ -30,7 +32,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const db = getDb();
+  const db = await getDb();
   try {
     const body = await req.json();
     const { id, exam_id, question_text, image_url, points, explanation, options } = body;
@@ -51,26 +53,23 @@ export async function POST(req: NextRequest) {
     let questionId = id;
 
     if (id) {
-      // Update existing question
-      const existing = db.prepare('SELECT id FROM questions WHERE id = ?').get(id);
+      const existing = await db.prepare('SELECT id FROM questions WHERE id = ?').get(id);
       if (!existing) {
         return NextResponse.json({ error: 'Soal tidak ditemukan' }, { status: 404 });
       }
 
-      db.prepare(
+      await db.prepare(
         'UPDATE questions SET question_text = ?, image_url = ?, points = ?, explanation = ? WHERE id = ?'
       ).run(question_text, image_url || null, Number(points) || 10, explanation || null, id);
 
-      // Replace options: delete old, insert new
-      db.prepare('DELETE FROM question_options WHERE question_id = ?').run(id);
+      await db.prepare('DELETE FROM question_options WHERE question_id = ?').run(id);
     } else {
-      // Create new question
       questionId = `q_${crypto.randomUUID().slice(0, 8)}`;
-      const maxOrder = db
+      const maxOrder = (await db
         .prepare('SELECT COALESCE(MAX(order_index), 0) as max_order FROM questions WHERE exam_id = ?')
-        .get(exam_id) as { max_order: number };
+        .get(exam_id)) as { max_order: number };
 
-      db.prepare(
+      await db.prepare(
         'INSERT INTO questions (id, exam_id, order_index, question_text, image_url, points, explanation) VALUES (?, ?, ?, ?, ?, ?, ?)'
       ).run(
         questionId,
@@ -84,7 +83,7 @@ export async function POST(req: NextRequest) {
     }
 
     for (const opt of options) {
-      db.prepare(
+      await db.prepare(
         'INSERT INTO question_options (id, question_id, option_key, option_text, image_url, is_correct) VALUES (?, ?, ?, ?, ?, ?)'
       ).run(
         `${questionId}_${opt.option_key}`,
@@ -104,7 +103,7 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getDb();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 
@@ -112,8 +111,8 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'id soal wajib diisi' }, { status: 400 });
     }
 
-    db.prepare('DELETE FROM question_options WHERE question_id = ?').run(id);
-    db.prepare('DELETE FROM questions WHERE id = ?').run(id);
+    await db.prepare('DELETE FROM question_options WHERE question_id = ?').run(id);
+    await db.prepare('DELETE FROM questions WHERE id = ?').run(id);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
