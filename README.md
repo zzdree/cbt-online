@@ -1,4 +1,4 @@
-# CBT Online — Sistem Ujian Online Berbasis Web
+# CBT Online: Sistem Ujian Online Berbasis Web
 
 > 🌐 **Live Demo Cloudflare**: [https://cbt-online.zzdree.workers.dev](https://cbt-online.zzdree.workers.dev)  
 > 📦 **GitHub Repository**: [https://github.com/zzdree/cbt-online](https://github.com/zzdree/cbt-online)
@@ -50,7 +50,7 @@ Sistem Ujian Online Berbasis Komputer (CBT / Computer-Based Test) modern yang re
 - **Framework**: Next.js 15 (App Router) + React 19 + TypeScript
 - **Styling**: Tailwind CSS + Lucide Icons
 - **Math Rendering**: KaTeX 0.16
-- **Database**: SQLite bawaan Node (`node:sqlite` DatabaseSync) — *Zero-config, zero-dependency, instan jalan tanpa instalasi database server eksternal.*
+- **Database**: SQLite bawaan Node (`node:sqlite` DatabaseSync), *Zero-config, zero-dependency, instan jalan tanpa instalasi database server eksternal.*
 - **AI Engine**: KiosAPI (REST OpenAI-compatible via `/v1/chat/completions`)
 
 ---

@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Clock,
   Printer,
+  AlertCircle,
 } from 'lucide-react';
 
 export default function ExamMonitorPage({ params }: { params: Promise<{ examId: string }> }) {
@@ -24,6 +25,8 @@ export default function ExamMonitorPage({ params }: { params: Promise<{ examId: 
   const [exam, setExam] = useState<any>(null);
   const [attempts, setAttempts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   const fetchData = async () => {
@@ -39,8 +42,17 @@ export default function ExamMonitorPage({ params }: { params: Promise<{ examId: 
 
       const monData = await monRes.json();
       setAttempts(monData.attempts || []);
+      setError('');
+      setHasLoadedOnce(true);
+    } catch (err: any) {
+      // Live monitoring: keep the last good data and surface a compact banner.
+      // The auto-refresh interval keeps running so the view can self-recover.
+      setError('Gagal menyegarkan data. Menampilkan data terakhir yang berhasil dimuat.');
     } finally {
-      setLoading(false);
+      // A monitoring screen has no meaningful "loaded" state before the first
+      // successful poll; stay on the loading state until then so the table
+      // never renders empty data as if it were authoritative.
+      if (hasLoadedOnce) setLoading(false);
     }
   };
 
@@ -159,6 +171,19 @@ export default function ExamMonitorPage({ params }: { params: Promise<{ examId: 
             </div>
           </div>
 
+          {/* Refresh failure banner, shown only after a previously successful
+              load. The polling interval keeps running so the dashboard can
+              recover on its own. */}
+          {error && (
+            <div
+              role="status"
+              className="mt-4 flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
+            >
+              <AlertCircle className="h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-400" />
+              <span>{error}</span>
+            </div>
+          )}
+
           {/* Quick Metrics */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
             <div className="p-3 bg-slate-50 dark:bg-slate-850 rounded-xl">
@@ -208,7 +233,21 @@ export default function ExamMonitorPage({ params }: { params: Promise<{ examId: 
           </div>
 
           {loading ? (
-            <div className="p-12 text-center text-sm text-slate-500">Memuat data peserta...</div>
+            <div className="p-12 text-center text-sm text-slate-500">
+              {error ? (
+                <span className="flex flex-col items-center gap-3">
+                  <span className="flex items-center justify-center gap-2 text-rose-600 dark:text-rose-400">
+                    <AlertCircle className="w-4 h-4" />
+                    {error}
+                  </span>
+                  <Button variant="outline" onClick={() => fetchData()}>
+                    Coba Lagi
+                  </Button>
+                </span>
+              ) : (
+                'Memuat data peserta...'
+              )}
+            </div>
           ) : attempts.length === 0 ? (
             <div className="p-12 text-center text-sm text-slate-500">
               Belum ada siswa yang masuk ke sesi ujian ini. Bagikan token{' '}
@@ -269,14 +308,14 @@ export default function ExamMonitorPage({ params }: { params: Promise<{ examId: 
                               <ShieldAlert className="w-3.5 h-3.5" /> {a.violation_count}× pelanggaran
                             </span>
                           ) : (
-                            <span className="text-slate-400">0 (Tertib)</span>
+                            <span className="text-slate-600 dark:text-slate-400">0 (Tertib)</span>
                           )}
                         </td>
                         <td className="p-3 font-mono font-bold text-sm">
                           {a.score != null ? (
                             a.score
                           ) : (
-                            <span className="text-slate-400 font-normal">-</span>
+                            <span className="text-slate-600 dark:text-slate-400 font-normal">-</span>
                           )}
                         </td>
                         <td className="p-3">
@@ -285,7 +324,7 @@ export default function ExamMonitorPage({ params }: { params: Promise<{ examId: 
                           ) : a.is_passed === 0 ? (
                             <Badge variant="rose">Belum Lulus</Badge>
                           ) : (
-                            <span className="text-slate-400">-</span>
+                            <span className="text-slate-600 dark:text-slate-400">-</span>
                           )}
                         </td>
                         <td className="p-3 text-slate-500 font-mono text-[11px]">

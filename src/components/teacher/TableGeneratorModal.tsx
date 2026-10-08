@@ -130,7 +130,7 @@ export function TableGeneratorModal({ isOpen, onClose, onInsert }: TableGenerato
                         <button
                           type="button"
                           onClick={() => removeColumn(cIdx)}
-                          className="text-slate-400 hover:text-rose-500 p-1"
+                          className="text-slate-500 hover:text-rose-500 p-1"
                           title="Hapus kolom"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -163,7 +163,7 @@ export function TableGeneratorModal({ isOpen, onClose, onInsert }: TableGenerato
                       <button
                         type="button"
                         onClick={() => removeRow(rIdx)}
-                        className="text-slate-400 hover:text-rose-500 p-1"
+                        className="text-slate-500 hover:text-rose-500 p-1"
                         title="Hapus baris"
                       >
                         <Trash2 className="w-3 h-3" />

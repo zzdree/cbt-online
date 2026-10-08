@@ -1,13 +1,13 @@
-# CBT Online — Developer Guide
+# CBT Online: Developer Guide
 
 Sistem ujian online berbasis Next.js 15 App Router, React 19, TypeScript, Tailwind CSS, SQLite, dan KaTeX.
 
 ## Perintah Utama
 
-- `npm run dev` — Menjalankan development server pada http://localhost:3000
-- `npm run build` — Kompilasi build produksi Next.js
-- `npm run start` — Menjalankan build produksi
-- `npx tsx scripts/test-cbt.ts` — Menjalankan rangkaian uji verifikasi sistem
+- `npm run dev`, Menjalankan development server pada http://localhost:3000
+- `npm run build`, Kompilasi build produksi Next.js
+- `npm run start`, Menjalankan build produksi
+- `npx tsx scripts/test-cbt.ts`, Menjalankan rangkaian uji verifikasi sistem
 
 ## Arsitektur & Aturan
 
@@ -21,5 +21,13 @@ Sistem ujian online berbasis Next.js 15 App Router, React 19, TypeScript, Tailwi
 - **KiosAPI AI Integration**:
   - Client pemanggil KiosAPI berada di `src/lib/kiosapi.ts` dan diakses melalui route handler `/api/ai/generate/route.ts`.
 
+<!-- antislop:start -->
 ## antislop
-Terapkan prinsip desain antislop: tipografi akademis bersih, kontras tinggi (WCAG AAA), touch targets minimal 48px pada mobile, dan tanpa elemen visual berlebih yang mengganggu konsentrasi ujian.
+For UI, copy, people, mobile layout, or code comments work, read `antislop.md` (core) and then the skill for the task:
+- UI / visual: `skills/antislop-ui/SKILL.md`
+- Copy & text: `skills/antislop-copywriting/SKILL.md`
+- People: `skills/antislop-human/SKILL.md`
+- Mobile / responsive: `skills/antislop-layoutmobile/SKILL.md`
+- Code comments: `skills/antislop-code/SKILL.md`
+Before starting, ask the user when antislop applies: during the work, or after it is done.
+<!-- antislop:end -->

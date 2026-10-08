@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, ZoomIn } from 'lucide-react';
 
 interface ImageLightboxProps {
@@ -12,11 +12,25 @@ interface ImageLightboxProps {
 export function ImageLightbox({ src, alt = 'Gambar Soal', className = '' }: ImageLightboxProps) {
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen || !src) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, src]);
+
   if (!src) return null;
 
   return (
     <>
-      <div className="relative inline-block my-2 group cursor-pointer" onClick={() => setIsOpen(true)}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        aria-label="Perbesar gambar"
+        className="relative inline-block my-2 group cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+      >
         <img
           src={src}
           alt={alt}
@@ -27,17 +41,20 @@ export function ImageLightbox({ src, alt = 'Gambar Soal', className = '' }: Imag
             <ZoomIn className="w-3.5 h-3.5" /> Klik untuk perbesar
           </span>
         </div>
-      </div>
+      </button>
 
       {isOpen && (
         <div
           className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setIsOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Pratinjau gambar soal"
         >
           <div className="relative max-w-4xl max-h-[90vh] flex flex-col items-center">
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute -top-12 right-0 text-white hover:text-slate-300 bg-slate-800/80 p-2 rounded-full transition-colors"
+              className="absolute -top-12 right-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-white hover:text-slate-300 bg-slate-800/80 p-2 rounded-full transition-colors"
               aria-label="Tutup pratinjau gambar"
             >
               <X className="w-6 h-6" />

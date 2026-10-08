@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { ArrowLeft, Sparkles, Key, Check, AlertCircle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Cpu, Key, Check, AlertCircle, ExternalLink } from 'lucide-react';
 
 export default function TeacherSettingsPage() {
   const [apiKey, setApiKey] = useState('');
@@ -34,6 +34,9 @@ export default function TeacherSettingsPage() {
           }
         }
       })
+      .catch(() =>
+        setErrorMsg('Gagal memuat pengaturan tersimpan. Periksa koneksi jaringan Anda.')
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -87,7 +90,7 @@ export default function TeacherSettingsPage() {
         <Card className="p-6 sm:p-8">
           <div className="flex items-start gap-4 mb-6">
             <div className="w-12 h-12 rounded-2xl bg-brand-100 dark:bg-brand-950/60 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-6 h-6 text-brand-600 dark:text-brand-400" />
+              <Cpu className="w-6 h-6 text-brand-600 dark:text-brand-400" />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -123,7 +126,7 @@ export default function TeacherSettingsPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                  <Key className="w-4 h-4 text-slate-400" /> KiosAPI Secret Key
+                  <Key className="w-4 h-4 text-slate-500" /> KiosAPI Secret Key
                 </label>
                 {maskedKey && (
                   <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono">

@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -14,7 +13,7 @@ import {
   ShieldAlert,
   ArrowLeft,
   Award,
-  Sparkles,
+  BookOpen,
   Lock,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -28,7 +27,6 @@ export default function ExamResultPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // 1. Try sessionStorage first
     try {
       const cached = sessionStorage.getItem('cbt_result');
       if (cached) {
@@ -42,7 +40,6 @@ export default function ExamResultPage() {
       }
     } catch {}
 
-    // 2. Fetch from server
     fetch(`/api/student/state?attempt_id=${attemptId}`)
       .then((res) => res.json())
       .then((resData) => {
@@ -68,9 +65,9 @@ export default function ExamResultPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <p className="text-sm text-rose-500 mb-4">{error || 'Hasil tidak ditemukan'}</p>
-        <Link href="/">
-          <Button variant="outline">Kembali ke Beranda</Button>
-        </Link>
+        <Button href="/" variant="outline">
+          Kembali ke Beranda
+        </Button>
       </div>
     );
   }
@@ -84,7 +81,6 @@ export default function ExamResultPage() {
         {/* Main Status Card */}
         <Card className="text-center p-6 sm:p-8">
           {showScore ? (
-            /* CASE 1: SCORE VISIBLE */
             <>
               <div
                 className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4 ${
@@ -109,7 +105,7 @@ export default function ExamResultPage() {
 
               {/* Big Score Display */}
               <div className="my-6 p-6 rounded-2xl bg-slate-50 dark:bg-slate-850/60 border border-slate-200 dark:border-slate-800">
-                <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold block mb-1">
+                <span className="text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 font-semibold block mb-1">
                   Nilai Akhir Anda
                 </span>
                 <div className="text-6xl font-extrabold font-mono text-slate-900 dark:text-white tabular-nums">
@@ -141,7 +137,6 @@ export default function ExamResultPage() {
               )}
             </>
           ) : (
-            /* CASE 2: SCORE HIDDEN BY TEACHER */
             <>
               <div className="w-16 h-16 mx-auto rounded-2xl bg-brand-100 text-brand-600 dark:bg-brand-950/60 dark:text-brand-400 flex items-center justify-center mb-4">
                 <Lock className="w-8 h-8" />
@@ -188,11 +183,9 @@ export default function ExamResultPage() {
           )}
 
           <div className="mt-6 flex justify-center gap-3">
-            <Link href="/">
-              <Button variant="outline" size="md">
-                <ArrowLeft className="w-4 h-4" /> Kembali ke Halaman Utama
-              </Button>
-            </Link>
+            <Button href="/" variant="outline" size="md">
+              <ArrowLeft className="w-4 h-4" /> Kembali ke Halaman Utama
+            </Button>
           </div>
         </Card>
 
@@ -200,7 +193,7 @@ export default function ExamResultPage() {
         {showScore && data.show_review && Array.isArray(data.review) && data.review.length > 0 && (
           <div className="space-y-4">
             <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-brand-600" /> Pembahasan Soal
+              <BookOpen className="w-4 h-4 text-brand-600" /> Pembahasan Soal
             </h2>
 
             {data.review.map((item: any, idx: number) => (

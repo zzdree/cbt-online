@@ -16,19 +16,30 @@ export interface UniversalDb {
 // Cached local node:sqlite instance
 let _nodeDb: any = null;
 
+// Plain Node (`next dev` / `next start`) defines no Worker globals, while
+// workerd always provides WebSocketPair. Use that as the discriminator so a
+// local run never binds to the empty dev D1 emulator.
+function isWorkerRuntime(): boolean {
+  return typeof (globalThis as Record<string, unknown>).WebSocketPair !== 'undefined';
+}
+
 async function getD1Database(): Promise<D1Database | null> {
+  if (!isWorkerRuntime()) {
+    return null;
+  }
+
   try {
     const ctx = await getCloudflareContext({ async: true });
-    if (ctx?.env && (ctx.env as any).DB) {
-      return (ctx.env as any).DB as D1Database;
+    if (ctx?.env && (ctx.env as Record<string, unknown>).DB) {
+      return (ctx.env as unknown as { DB: D1Database }).DB;
     }
   } catch {
     // getCloudflareContext throws if called outside cloudflare worker request context
   }
 
-  const globalEnv = (globalThis as any)?.env;
+  const globalEnv = (globalThis as { env?: { DB?: D1Database } }).env;
   if (globalEnv?.DB) {
-    return globalEnv.DB as D1Database;
+    return globalEnv.DB;
   }
 
   return null;

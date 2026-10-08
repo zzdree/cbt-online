@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { Presentation, Lock, User, ArrowLeft } from 'lucide-react';
 
 export default function TeacherLoginPage() {
@@ -40,12 +41,15 @@ export default function TeacherLoginPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" /> Kembali ke Beranda
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+          >
+            <ArrowLeft className="w-4 h-4" /> Kembali ke Beranda
+          </Link>
+          <ThemeToggle />
+        </div>
 
         <Card className="p-6 sm:p-8">
           <div className="text-center mb-7">
@@ -72,7 +76,7 @@ export default function TeacherLoginPage() {
                 Username
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input
                   type="text"
                   value={username}
@@ -89,7 +93,7 @@ export default function TeacherLoginPage() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input
                   type="password"
                   value={password}

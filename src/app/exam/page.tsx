@@ -87,7 +87,7 @@ export default function StudentEnterPage() {
                 Kode / Token Ujian
               </label>
               <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 w-4 h-4 text-slate-400" />
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 w-4 h-4 text-slate-500" />
                 <input
                   type="text"
                   value={form.token}
@@ -105,7 +105,7 @@ export default function StudentEnterPage() {
                 Nomor Peserta / NISN
               </label>
               <div className="relative">
-                <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input
                   type="text"
                   value={form.student_number}
@@ -121,7 +121,7 @@ export default function StudentEnterPage() {
                 Nama Lengkap
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input
                   type="text"
                   value={form.student_name}

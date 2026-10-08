@@ -69,7 +69,7 @@ export default function ExamRoomPage() {
   const lockoutInFlightRef = useRef(false);
   const submittedRef = useRef(false);
 
-  // ----- Load exam state from server (also restores lockout on refresh) -----
+  // Server is the source of truth, so a refresh restores an active lockout
   const loadStateFromServer = useCallback(async () => {
     try {
       const res = await fetch(`/api/student/state?attempt_id=${attemptId}`);
@@ -87,7 +87,7 @@ export default function ExamRoomPage() {
       setStudentName(data.student_name);
       setViolationCount(data.violation_count || 0);
 
-      // Restore lockout if active (ANTI-REFRESH PROTECTION)
+      // Restore an in-progress lockout so refreshing doesn't get a free reset
       if (data.lockout_remaining > 0) {
         setLockoutRemaining(data.lockout_remaining);
         setIsLocked(true);
@@ -121,7 +121,6 @@ export default function ExamRoomPage() {
     loadStateFromServer();
   }, [loadStateFromServer]);
 
-  // ----- Countdown timer tick -----
   useEffect(() => {
     if (loadState !== 'ready') return;
     const interval = setInterval(() => {
@@ -137,7 +136,6 @@ export default function ExamRoomPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadState]);
 
-  // ----- Lockout countdown tick -----
   useEffect(() => {
     if (!isLocked || lockoutRemaining <= 0) return;
     const interval = setInterval(() => {
@@ -153,7 +151,7 @@ export default function ExamRoomPage() {
     return () => clearInterval(interval);
   }, [isLocked, lockoutRemaining > 0]);
 
-  // ----- ANTI-CHEAT: trigger lockout on tab switch / window blur -----
+  // Lockout fires from a tab switch or window blur
   const triggerLockout = useCallback(
     async (violationType: string) => {
       // Prevent duplicates (blur + visibilitychange often fire together)
@@ -188,7 +186,7 @@ export default function ExamRoomPage() {
     [attemptId, isLocked, lockoutRemaining, loadState]
   );
 
-  // Attach listeners ONLY when exam active & not locked
+  // Listeners are only active while the exam is unlocked, so an active lockout can't trigger another
   useEffect(() => {
     if (loadState !== 'ready' || isLocked) return;
 
@@ -210,7 +208,6 @@ export default function ExamRoomPage() {
     };
   }, [loadState, isLocked, triggerLockout]);
 
-  // ----- Unlock after 30s -----
   const handleUnlock = async () => {
     setUnlocking(true);
     try {
@@ -224,7 +221,7 @@ export default function ExamRoomPage() {
         setIsLocked(false);
         setLockoutRemaining(0);
       } else if (data.remaining_seconds > 0) {
-        // Not yet expired — keep waiting
+        // Not yet expired; keep waiting
         setLockoutRemaining(data.remaining_seconds);
       }
     } catch {
@@ -234,7 +231,6 @@ export default function ExamRoomPage() {
     }
   };
 
-  // ----- Answers -----
   const currentQuestion = questions[currentIndex];
 
   const selectOption = async (questionId: string, optionId: string) => {
@@ -287,7 +283,6 @@ export default function ExamRoomPage() {
     }).catch(() => {});
   };
 
-  // ----- Navigation status map -----
   const statuses: QuestionStatus[] = useMemo(() => {
     return questions.map((q) => {
       const a = answers[q.id];
@@ -310,7 +305,6 @@ export default function ExamRoomPage() {
     return { answered, hesitant, empty, total: questions.length };
   }, [statuses, questions.length]);
 
-  // ----- Submit -----
   const handleSubmit = async (isAuto = false) => {
     if (submittedRef.current) return;
     if (!isAuto && !showSubmitConfirm) {
@@ -340,7 +334,6 @@ export default function ExamRoomPage() {
     }
   };
 
-  // ----- Loading / error states -----
   if (loadState === 'loading') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3">
@@ -423,6 +416,7 @@ export default function ExamRoomPage() {
                   onClick={() => toggleHesitant(currentQuestion.id)}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2',
                     currentAnswer?.is_hesitant
                       ? 'bg-amber-500 border-amber-500 text-white'
                       : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-amber-400 hover:text-amber-600'
@@ -455,6 +449,7 @@ export default function ExamRoomPage() {
                       onClick={() => selectOption(currentQuestion.id, opt.id)}
                       className={cn(
                         'w-full flex items-start gap-3 p-3.5 sm:p-4 rounded-xl border-2 text-left transition-all min-h-[52px]',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2',
                         isSelected
                           ? 'border-brand-500 bg-brand-50/70 dark:bg-brand-950/30 shadow-sm'
                           : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
@@ -494,7 +489,7 @@ export default function ExamRoomPage() {
                 <ChevronLeft className="w-4 h-4" /> Sebelumnya
               </Button>
 
-              <span className="text-xs text-slate-400 tabular-nums">
+              <span className="text-xs text-slate-600 dark:text-slate-400 tabular-nums">
                 {currentIndex + 1} / {questions.length}
               </span>
 
@@ -524,7 +519,7 @@ export default function ExamRoomPage() {
               <div className="flex gap-3 text-[11px] text-slate-500 mb-3">
                 <span>{stats.answered} dijawab</span>
                 <span className="text-amber-600">{stats.hesitant} ragu</span>
-                <span className="text-slate-400">{stats.empty} kosong</span>
+                <span className="text-slate-600 dark:text-slate-400">{stats.empty} kosong</span>
               </div>
 
               <QuestionNavigationGrid
@@ -570,7 +565,7 @@ export default function ExamRoomPage() {
               <button
                 type="button"
                 onClick={() => setShowNavigator(false)}
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
                 aria-label="Tutup daftar soal"
               >
                 <X className="w-5 h-5 text-slate-500" />

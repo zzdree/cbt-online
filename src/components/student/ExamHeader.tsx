@@ -3,6 +3,7 @@
 import React from 'react';
 import { Timer, ListChecks, LogOut, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
 
 interface ExamHeaderProps {
   title: string;
@@ -39,7 +40,7 @@ export function ExamHeader({
   const isCritical = remainingSeconds <= 60; // < 1 minute
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur border-b border-slate-200 dark:border-slate-800">
+    <header className="sticky top-0 z-40 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center gap-3">
         {/* Exam info (hide subject on small screens) */}
         <div className="min-w-0 flex-1">
@@ -47,7 +48,7 @@ export function ExamHeader({
             <h1 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 truncate">
               {title}
             </h1>
-            <span className="hidden sm:inline text-xs text-slate-400 dark:text-slate-500">·</span>
+            <span className="hidden sm:inline text-xs text-slate-500 dark:text-slate-400">·</span>
             <span className="hidden sm:inline text-xs text-slate-500 dark:text-slate-400 truncate">
               {subject}
             </span>
@@ -82,21 +83,24 @@ export function ExamHeader({
           <span>{formatTime(remainingSeconds)}</span>
         </div>
 
+        {/* Theme toggle */}
+        <ThemeToggle />
+
         {/* Actions */}
         <button
           type="button"
           onClick={onOpenNavigator}
-          className="lg:hidden flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          className="lg:hidden min-h-[44px] flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
           aria-label="Buka daftar soal"
         >
           <ListChecks className="w-4 h-4" />
-          <span className="hidden xs:inline">Soal</span>
+          <span className="hidden sm:inline">Soal</span>
         </button>
 
         <button
           type="button"
           onClick={onSubmit}
-          className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-medium transition-colors"
+          className="min-h-[44px] flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-medium transition-colors"
         >
           <LogOut className="w-4 h-4" />
           <span className="hidden sm:inline">Selesai &amp; Kumpulkan</span>

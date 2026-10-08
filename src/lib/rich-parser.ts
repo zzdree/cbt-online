@@ -6,7 +6,6 @@ import katex from 'katex';
 export function renderMathOnly(text: string): string {
   if (!text) return '';
 
-  // 1. Display math $$...$$
   let result = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
     try {
       const rendered = katex.renderToString(formula.trim(), {
@@ -19,7 +18,6 @@ export function renderMathOnly(text: string): string {
     }
   });
 
-  // 2. Inline math $...$
   result = result.replace(/\$([^\$\n]+?)\$/g, (match, formula) => {
     try {
       return katex.renderToString(formula.trim(), {
@@ -74,20 +72,17 @@ export function parseMarkdownTables(text: string): string {
 export function parseRichContent(content: string): string {
   if (!content) return '';
 
-  // Step 1: Parse tables first so their pipes aren't corrupted
+  // Tables parsed before bold/italic so their pipe delimiters survive
   let text = parseMarkdownTables(content);
 
-  // Step 2: Parse bold and italics (outside of math)
   // Bold **text**
   text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   // Italic *text* (only single asterisks not adjacent to math)
   text = text.replace(/(^|[^\*])\*([^\*\n]+)\*([^\*]|$)/g, '$1<em>$2</em>$3');
 
-  // Step 3: Parse KaTeX math
   text = renderMathOnly(text);
 
-  // Step 4: Handle line breaks (preserve paragraph structure)
-  // If line is not already part of an HTML block (like div or table), wrap lines in p or replace \n with <br/>
+  // Rendered divs (tables, display math) keep their own layout, so only the text between them gets line breaks
   const segments = text.split(/(<div[\s\S]*?<\/div>)/g);
   return segments
     .map(seg => {

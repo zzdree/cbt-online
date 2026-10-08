@@ -30,7 +30,8 @@ export function QuestionNavigationGrid({
             type="button"
             onClick={() => onSelect(i)}
             className={cn(
-              'h-9 rounded-md text-xs font-semibold border transition-all tabular-nums',
+              'min-h-[44px] rounded-md text-xs font-semibold border transition-all tabular-nums',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900',
               isCurrent && 'ring-2 ring-brand-500 ring-offset-1 dark:ring-offset-slate-900 scale-105',
               status === 'answered' &&
                 'bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700',

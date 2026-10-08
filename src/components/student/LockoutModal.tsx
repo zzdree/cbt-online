@@ -30,7 +30,7 @@ export function LockoutModal({ remainingSeconds, violationCount, onUnlock, unloc
           </div>
           <div>
             <h2 className="text-white font-bold text-lg leading-tight">LAYAR TERKUNCI</h2>
-            <p className="text-rose-100 text-xs">Pelanggaran terdeteksi — ujian dijeda</p>
+            <p className="text-rose-100 text-xs">Pelanggaran terdeteksi: ujian dijeda</p>
           </div>
         </div>
 
@@ -82,7 +82,6 @@ export function LockoutModal({ remainingSeconds, violationCount, onUnlock, unloc
 
           {/* Violation counter */}
           <div className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-300">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             Total pelanggaran tercatat: <strong>{violationCount}×</strong>
           </div>
 
@@ -104,7 +103,7 @@ export function LockoutModal({ remainingSeconds, violationCount, onUnlock, unloc
 
         {/* Footer note */}
         <div className="px-6 py-3 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 text-center">
-          <p className="text-[11px] text-slate-400 dark:text-slate-500">
+          <p className="text-[11px] text-slate-600 dark:text-slate-400">
             Pelanggaran ini dicatat dan dilaporkan ke pengawas ujian.
           </p>
         </div>

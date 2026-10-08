@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, KeyRound, Sparkles } from 'lucide-react';
+import { ArrowLeft, KeyRound } from 'lucide-react';
 
 export default function NewExamPage() {
   const router = useRouter();
@@ -216,13 +216,11 @@ export default function NewExamPage() {
             </div>
 
             <div className="flex justify-end gap-3 pt-3">
-              <Link href="/teacher/dashboard">
-                <Button type="button" variant="ghost">
-                  Batal
-                </Button>
-              </Link>
+              <Button href="/teacher/dashboard" type="button" variant="ghost">
+                Batal
+              </Button>
               <Button type="submit" variant="success" size="lg" isLoading={loading}>
-                Lanjut ke Input Soal →
+                Lanjut ke Input Soal
               </Button>
             </div>
           </form>

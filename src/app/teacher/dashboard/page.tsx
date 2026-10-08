@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import {
   Presentation,
   Plus,
@@ -17,19 +17,26 @@ import {
   Eye,
   EyeOff,
   LogOut,
+  AlertCircle,
 } from 'lucide-react';
 import { Exam } from '@/types';
 
 export default function TeacherDashboardPage() {
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
 
   const fetchExams = async () => {
+    setError('');
+    setLoading(true);
     try {
       const res = await fetch('/api/teacher/exams');
       const data = await res.json();
-      if (res.ok) setExams(data.exams || []);
+      if (!res.ok) throw new Error(data.error || 'Gagal memuat daftar ujian');
+      setExams(data.exams || []);
+    } catch (err: any) {
+      setError('Gagal memuat daftar ujian. Periksa koneksi jaringan Anda.');
     } finally {
       setLoading(false);
     }
@@ -79,16 +86,13 @@ export default function TeacherDashboardPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href="/teacher/dashboard/settings">
-              <Button variant="outline" size="sm">
-                <Settings className="w-4 h-4" /> Pengaturan AI
-              </Button>
-            </Link>
-            <Link href="/teacher/login">
-              <Button variant="ghost" size="sm" title="Keluar">
-                <LogOut className="w-4 h-4 text-slate-500" />
-              </Button>
-            </Link>
+            <ThemeToggle />
+            <Button href="/teacher/dashboard/settings" variant="outline" size="sm">
+              <Settings className="w-4 h-4" /> Pengaturan AI
+            </Button>
+            <Button href="/teacher/login" variant="ghost" size="sm" title="Keluar">
+              <LogOut className="w-4 h-4 text-slate-500" />
+            </Button>
           </div>
         </div>
       </nav>
@@ -102,14 +106,27 @@ export default function TeacherDashboardPage() {
               Kelola jadwal ujian, bank soal, dan pantau aktivitas peserta ujian.
             </p>
           </div>
-          <Link href="/teacher/dashboard/exams/new">
-            <Button variant="success" size="md">
-              <Plus className="w-4 h-4" /> Buat Ujian Baru
-            </Button>
-          </Link>
+          <Button href="/teacher/dashboard/exams/new" variant="success" size="md">
+            <Plus className="w-4 h-4" /> Buat Ujian Baru
+          </Button>
         </div>
 
-        {loading ? (
+        {error ? (
+          <Card className="p-12 text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 flex items-center justify-center mx-auto mb-3">
+              <AlertCircle className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+            </div>
+            <h3 className="text-base font-semibold text-rose-700 dark:text-rose-300">
+              Gagal Memuat Daftar Ujian
+            </h3>
+            <p className="text-xs text-rose-600/90 dark:text-rose-400/90 mt-1 mb-5">
+              Gagal memuat daftar ujian. Periksa koneksi jaringan Anda.
+            </p>
+            <Button variant="outline" onClick={() => fetchExams()}>
+              Coba Lagi
+            </Button>
+          </Card>
+        ) : loading ? (
           <div className="p-12 text-center text-sm text-slate-500">Memuat daftar ujian...</div>
         ) : exams.length === 0 ? (
           <Card className="p-12 text-center">
@@ -120,9 +137,9 @@ export default function TeacherDashboardPage() {
             <p className="text-xs text-slate-500 mt-1 mb-5">
               Klik tombol di bawah untuk membuat sesi ujian pertama Anda.
             </p>
-            <Link href="/teacher/dashboard/exams/new">
-              <Button variant="success">Buat Ujian Baru</Button>
-            </Link>
+            <Button href="/teacher/dashboard/exams/new" variant="success">
+              Buat Ujian Baru
+            </Button>
           </Card>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -170,7 +187,7 @@ export default function TeacherDashboardPage() {
                       </>
                     ) : (
                       <>
-                        <EyeOff className="w-3 h-3 text-slate-400" /> Disembunyikan
+                        <EyeOff className="w-3 h-3 text-slate-500" /> Disembunyikan
                       </>
                     )}
                   </button>
@@ -178,22 +195,25 @@ export default function TeacherDashboardPage() {
 
                 {/* Card Actions */}
                 <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <Link href={`/teacher/dashboard/exams/${exam.id}/questions`}>
-                    <Button variant="outline" size="sm" className="w-full text-xs" title="Kelola Soal">
-                      <BookOpen className="w-3.5 h-3.5" /> Soal
-                    </Button>
-                  </Link>
+                  <Button
+                    href={`/teacher/dashboard/exams/${exam.id}/questions`}
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs"
+                    title="Kelola Soal"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" /> Soal
+                  </Button>
 
-                  <Link href={`/teacher/dashboard/exams/${exam.id}/monitor`}>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="w-full text-xs"
-                      title="Live Monitoring Siswa & Pelanggaran"
-                    >
-                      <Activity className="w-3.5 h-3.5" /> Monitor
-                    </Button>
-                  </Link>
+                  <Button
+                    href={`/teacher/dashboard/exams/${exam.id}/monitor`}
+                    variant="primary"
+                    size="sm"
+                    className="w-full text-xs"
+                    title="Live Monitoring Siswa & Pelanggaran"
+                  >
+                    <Activity className="w-3.5 h-3.5" /> Monitor
+                  </Button>
 
                   <button
                     type="button"

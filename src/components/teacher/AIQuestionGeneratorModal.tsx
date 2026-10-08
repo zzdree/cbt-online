@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { RichContent } from '@/components/shared/RichContent';
 import { DraftQuestion, AIQuestionRequest } from '@/types';
-import { Sparkles, RefreshCw, CheckCircle2, Circle, Loader2, AlertTriangle, Settings } from 'lucide-react';
+import { Cpu, Play, RefreshCw, CheckCircle2, Circle, Loader2, AlertTriangle, Settings } from 'lucide-react';
 
 interface AIQuestionGeneratorModalProps {
   isOpen: boolean;
@@ -172,7 +172,7 @@ export function AIQuestionGeneratorModal({
       }}
       title={
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+          <Cpu className="w-5 h-5 text-brand-600 dark:text-brand-400" />
           <span>Generator Soal Otomatis AI</span>
           <Badge variant="brand">KiosAPI</Badge>
         </div>
@@ -267,7 +267,7 @@ export function AIQuestionGeneratorModal({
                 onChange={(e) => setForm({ ...form, count: Number(e.target.value) })}
                 className="w-full accent-brand-600"
               />
-              <div className="flex justify-between text-[10px] text-slate-400 mt-0.5">
+              <div className="flex justify-between text-[10px] text-slate-600 mt-0.5">
                 <span>1</span>
                 <span>10</span>
                 <span>20</span>
@@ -350,7 +350,7 @@ export function AIQuestionGeneratorModal({
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4" /> Generate {form.count} Soal dengan AI
+                  <Play className="w-4 h-4" /> Generate {form.count} Soal dengan AI
                 </>
               )}
             </Button>
@@ -393,7 +393,7 @@ export function AIQuestionGeneratorModal({
                     {draft.selected ? (
                       <CheckCircle2 className="w-5 h-5 text-brand-600" />
                     ) : (
-                      <Circle className="w-5 h-5 text-slate-400" />
+                      <Circle className="w-5 h-5 text-slate-500" />
                     )}
                     Soal {idx + 1} · {draft.points} poin
                   </button>

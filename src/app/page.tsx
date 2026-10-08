@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { GraduationCap, Presentation, ShieldCheck, Sparkles, Table2, Timer } from 'lucide-react';
+import { BookOpenCheck, GraduationCap, Presentation, ShieldCheck, Table2, Timer } from 'lucide-react';
 
 export default function HomePage() {
   return (
@@ -7,14 +7,11 @@ export default function HomePage() {
       <div className="w-full max-w-4xl">
         {/* Brand Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 dark:bg-brand-950/50 border border-brand-200 dark:border-brand-900 text-brand-700 dark:text-brand-300 text-xs font-medium mb-5">
-            <ShieldCheck className="w-3.5 h-3.5" /> Sistem Ujian Berbasis Komputer
-          </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
             CBT <span className="text-brand-600 dark:text-brand-400">Online</span>
           </h1>
           <p className="mt-4 text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Platform ujian online responsif untuk siswa &amp; guru — dilengkapi anti-cheat 30 detik,
+            Platform ujian online responsif untuk siswa dan guru, lengkap dengan anti-cheat 30 detik,
             editor soal matematis, dan generator soal AI.
           </p>
         </div>
@@ -33,7 +30,7 @@ export default function HomePage() {
               Kerjakan ujian dengan kode kelas. Terdeteksi pindah tab = terkunci 30 detik.
             </p>
             <span className="inline-flex items-center gap-1 text-sm text-brand-600 font-medium mt-4 group-hover:gap-2 transition-all">
-              Buka Portal Ujian →
+              Buka Portal Ujian
             </span>
           </Link>
 
@@ -49,7 +46,7 @@ export default function HomePage() {
               Kelola ujian, buat soal manual atau AI, atur visibilitas nilai, dan monitor siswa.
             </p>
             <span className="inline-flex items-center gap-1 text-sm text-emerald-600 font-medium mt-4 group-hover:gap-2 transition-all">
-              Buka Dashboard Guru →
+              Buka Dashboard Guru
             </span>
           </Link>
         </div>
@@ -58,7 +55,7 @@ export default function HomePage() {
         <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto">
           {[
             { icon: ShieldCheck, label: 'Anti-Cheat 30s', desc: 'Kebal refresh' },
-            { icon: Sparkles, label: 'Soal AI', desc: 'DeepSeek & GPT' },
+            { icon: BookOpenCheck, label: 'Soal AI', desc: 'DeepSeek & GPT' },
             { icon: Table2, label: 'Tabel & Gambar', desc: 'Konten kaya' },
             { icon: Timer, label: 'Timer Presisi', desc: 'Sinkron server' },
           ].map((f) => (
@@ -69,13 +66,13 @@ export default function HomePage() {
               <f.icon className="w-4 h-4 text-brand-600 dark:text-brand-400 flex-shrink-0" />
               <div className="min-w-0">
                 <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{f.label}</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-500 truncate">{f.desc}</div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{f.desc}</div>
               </div>
             </div>
           ))}
         </div>
 
-        <p className="text-center text-xs text-slate-400 dark:text-slate-600 mt-10">
+        <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-10">
           CBT Online · Dibangun dengan Next.js &amp; KaTeX
         </p>
       </div>

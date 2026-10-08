@@ -13,12 +13,14 @@ import {
   ArrowLeft,
   Plus,
   Sparkles,
+  ListChecks,
   Edit,
   Trash2,
   CheckCircle2,
   Copy,
   Activity,
   FileQuestion,
+  AlertCircle,
 } from 'lucide-react';
 
 export default function ExamQuestionsPage({ params }: { params: Promise<{ examId: string }> }) {
@@ -28,12 +30,15 @@ export default function ExamQuestionsPage({ params }: { params: Promise<{ examId
   const [exam, setExam] = useState<any>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
 
   const fetchData = async () => {
+    setError('');
+    setLoading(true);
     try {
       const [examRes, questionsRes] = await Promise.all([
         fetch('/api/teacher/exams'),
@@ -46,6 +51,8 @@ export default function ExamQuestionsPage({ params }: { params: Promise<{ examId
 
       const qData = await questionsRes.json();
       setQuestions(qData.questions || []);
+    } catch (err: any) {
+      setError('Gagal memuat bank soal. Periksa koneksi jaringan Anda.');
     } finally {
       setLoading(false);
     }
@@ -85,11 +92,9 @@ export default function ExamQuestionsPage({ params }: { params: Promise<{ examId
             <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
           </Link>
 
-          <Link href={`/teacher/dashboard/exams/${examId}/monitor`}>
-            <Button variant="primary" size="sm">
-              <Activity className="w-4 h-4" /> Pantau Siswa Ujian
-            </Button>
-          </Link>
+          <Button href={`/teacher/dashboard/exams/${examId}/monitor`} variant="primary" size="sm">
+            <Activity className="w-4 h-4" /> Pantau Siswa Ujian
+          </Button>
         </div>
 
         {/* Exam Title & Stats Banner */}
@@ -131,7 +136,22 @@ export default function ExamQuestionsPage({ params }: { params: Promise<{ examId
         </Card>
 
         {/* Questions List */}
-        {loading ? (
+        {error ? (
+          <Card className="p-12 text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 flex items-center justify-center mx-auto mb-3">
+              <AlertCircle className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+            </div>
+            <h3 className="text-base font-semibold text-rose-700 dark:text-rose-300">
+              Gagal Memuat Bank Soal
+            </h3>
+            <p className="text-xs text-rose-600/90 dark:text-rose-400/90 mt-1 mb-5">
+              Gagal memuat bank soal. Periksa koneksi jaringan Anda.
+            </p>
+            <Button variant="outline" onClick={() => fetchData()}>
+              Coba Lagi
+            </Button>
+          </Card>
+        ) : loading ? (
           <div className="p-12 text-center text-sm text-slate-500">Memuat bank soal...</div>
         ) : questions.length === 0 ? (
           <Card className="p-12 text-center">
@@ -147,7 +167,7 @@ export default function ExamQuestionsPage({ params }: { params: Promise<{ examId
                 <Plus className="w-4 h-4" /> Tambah Manual
               </Button>
               <Button variant="primary" onClick={() => setAiModalOpen(true)}>
-                <Sparkles className="w-4 h-4" /> Generate dengan AI
+                <ListChecks className="w-4 h-4" /> Generate dengan AI
               </Button>
             </div>
           </Card>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -13,6 +13,7 @@ interface ModalProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
   showCloseButton?: boolean;
   closeOnBackdrop?: boolean;
+  ariaLabel?: string;
 }
 
 export function Modal({
@@ -24,7 +25,12 @@ export function Modal({
   size = 'md',
   showCloseButton = true,
   closeOnBackdrop = true,
+  ariaLabel,
 }: ModalProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const labelledBy = title ? titleId : undefined;
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -34,6 +40,28 @@ export function Modal({
     return () => {
       document.body.style.overflow = 'unset';
     };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const focusable = panel.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    focusable?.focus();
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -58,6 +86,11 @@ export function Modal({
       {/* Modal Dialog */}
       <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
         <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={labelledBy}
+          aria-label={labelledBy ? undefined : ariaLabel}
           className={cn(
             'relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 text-left shadow-2xl transition-all sm:my-8 w-full border border-slate-200 dark:border-slate-800',
             sizeClasses[size]
@@ -68,14 +101,21 @@ export function Modal({
           {(title || showCloseButton) && (
             <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800/80 px-6 py-4">
               <div>
-                {title && <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{title}</h3>}
+                {title && (
+                  <h3
+                    id={titleId}
+                    className="text-lg font-semibold text-slate-900 dark:text-slate-100"
+                  >
+                    {title}
+                  </h3>
+                )}
                 {description && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{description}</p>}
               </div>
               {showCloseButton && (
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors"
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
                 >
                   <X className="w-5 h-5" />
                 </button>

@@ -211,7 +211,7 @@ export function EquationHelperModal({ isOpen, onClose, onInsert }: EquationHelpe
           </div>
           {customInput.trim() && (
             <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 text-center">
-              <span className="text-[10px] text-slate-400 block mb-1">Pratinjau Hasil:</span>
+              <span className="text-[10px] text-slate-600 block mb-1">Pratinjau Hasil:</span>
               <div
                 dangerouslySetInnerHTML={{
                   __html: renderMathOnly(`$${customInput}$`),
