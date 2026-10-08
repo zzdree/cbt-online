@@ -11,7 +11,10 @@ Sistem ujian online berbasis Next.js 15 App Router, React 19, TypeScript, Tailwi
 
 ## Arsitektur & Aturan
 
-- **Database**: Menggunakan SQLite bawaan Node.js (`node:sqlite`) yang tersimpan di `./cbt.db`. Singleton connection diinisialisasi di `src/lib/db.ts`.
+> Baca `HANDOFF.md` di root repo untuk status terkini, jebakan runtime, dan daftar pekerjaan sisa.
+
+- **Database**: SQLite bawaan Node.js (`node:sqlite`) di `./cbt.db` untuk dev/lokal, dan Cloudflare D1 (`env.DB`) di produksi. Pemilihan runtime ditentukan oleh keberadaan global `WebSocketPair` di `src/lib/db.ts`. Jangan memakai binding D1 di Node biasa: ia menunjuk emulator kosong dan setiap kueri gagal `no such table`.
+- **Gambar soal**: Cloudflare Worker tidak boleh menulis disk. Gambar disimpan sebagai data URI di tabel `uploaded_images` (D1/lokal) dan dilayani lewat `/api/teacher/upload/[imageId]`, batas 500 KB. Lihat `src/lib/ensure-uploads.ts`.
 - **Anti-Cheat 30 Detik**:
   - Dikelola oleh hook di `src/app/exam/[attemptId]/page.tsx` via `visibilitychange` & `window.blur`.
   - Server memvalidasi dan menyimpan `lockout_until` di `src/app/api/student/lockout/route.ts`.
