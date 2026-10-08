@@ -4,7 +4,9 @@
 
 -- 1. Seed Teacher
 INSERT OR IGNORE INTO users (id, username, password_hash, name, role)
-VALUES ('user_guru_01', 'guru', 'guru123', 'Bpk. Andreas R.C., S.T.', 'teacher');
+-- Akun awal sementara, WAJIB ganti username/password saat instalasi paling lambat
+-- pada sesi administrasi pertama. Lihat bagian "Instalasi Pemakaian Nyata" pada README.
+VALUES ('user_admin_awal', 'admin', 'ganti_password_sebelum_dipakai', 'Administrator Sekolah', 'admin');
 
 -- 2. Seed Settings
 INSERT OR IGNORE INTO settings (key, value) VALUES ('kiosapi_key', '');

@@ -10,8 +10,8 @@ import { Presentation, Lock, User, ArrowLeft } from 'lucide-react';
 
 export default function TeacherLoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('guru');
-  const [password, setPassword] = useState('guru123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -81,7 +81,8 @@ export default function TeacherLoginPage() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Username guru"
+                  placeholder="Username"
+                  autoComplete="username"
                   className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   required
                 />
@@ -99,6 +100,7 @@ export default function TeacherLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
+                  autoComplete="current-password"
                   className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   required
                 />
@@ -116,9 +118,9 @@ export default function TeacherLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 p-3 bg-slate-50 dark:bg-slate-850 rounded-lg text-xs text-slate-500 dark:text-slate-400">
-            Akun bawaan demo: Username <strong>guru</strong> · Password <strong>guru123</strong>
-          </div>
+          <p className="mt-6 text-xs text-slate-500 dark:text-slate-400 text-center">
+            Hubungi administrator sekolah bila Anda lupa kata sandi.
+          </p>
         </Card>
       </div>
     </main>

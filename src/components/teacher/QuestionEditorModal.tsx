@@ -12,9 +12,11 @@ import { Calculator, Table, Image, Eye, Plus, Trash2, CheckCircle2 } from 'lucid
 interface QuestionEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // Dipakai untuk ujian; dalam mode "bank" prop ini membawa id bank soal.
   examId: string;
   initialQuestion?: Question | null;
   onSaved: () => void;
+  mode?: 'exam' | 'bank';
 }
 
 export function QuestionEditorModal({
@@ -23,7 +25,9 @@ export function QuestionEditorModal({
   examId,
   initialQuestion,
   onSaved,
+  mode = 'exam',
 }: QuestionEditorModalProps) {
+  const isBank = mode === 'bank';
   const [questionText, setQuestionText] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [points, setPoints] = useState(10);
@@ -151,22 +155,37 @@ export function QuestionEditorModal({
     setErrorMsg('');
 
     try {
-      const payload = {
-        id: initialQuestion?.id,
-        exam_id: examId,
-        question_text: questionText,
-        image_url: imageUrl || null,
-        points: Number(points) || 10,
-        explanation: explanation || null,
-        options: options.map((opt) => ({
-          option_key: opt.key,
-          option_text: opt.text,
-          image_url: opt.image_url || null,
-          is_correct: opt.is_correct ? 1 : 0,
-        })),
-      };
+      const payload = isBank
+        ? {
+            id: initialQuestion?.id,
+            bank_id: examId,
+            question_text: questionText,
+            image_url: imageUrl || null,
+            points: Number(points) || 10,
+            explanation: explanation || null,
+            options: options.map((opt) => ({
+              key: opt.key,
+              text: opt.text,
+              image_url: opt.image_url || null,
+              is_correct: opt.is_correct ? 1 : 0,
+            })),
+          }
+        : {
+            id: initialQuestion?.id,
+            exam_id: examId,
+            question_text: questionText,
+            image_url: imageUrl || null,
+            points: Number(points) || 10,
+            explanation: explanation || null,
+            options: options.map((opt) => ({
+              option_key: opt.key,
+              option_text: opt.text,
+              image_url: opt.image_url || null,
+              is_correct: opt.is_correct ? 1 : 0,
+            })),
+          };
 
-      const res = await fetch('/api/teacher/questions', {
+      const res = await fetch(isBank ? '/api/teacher/banks/items' : '/api/teacher/questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -189,8 +208,20 @@ export function QuestionEditorModal({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title={initialQuestion ? 'Edit Soal Ujian' : 'Tambah Soal Manual'}
-        description="Lengkapi narasi soal, rumus matematika, tabel, dan kunci jawaban pilihan ganda."
+        title={
+          initialQuestion
+            ? isBank
+              ? 'Edit Butir Soal di Bank'
+              : 'Edit Soal Ujian'
+            : isBank
+              ? 'Tambah Butir Soal ke Bank'
+              : 'Tambah Soal Manual'
+        }
+        description={
+          isBank
+            ? 'Butir soal ini tersimpan di bank soal dan bisa dipakai berulang pada banyak ujian.'
+            : 'Lengkapi narasi soal, rumus matematika, tabel, dan kunci jawaban pilihan ganda.'
+        }
         size="2xl"
       >
         <div className="space-y-5">
@@ -260,7 +291,7 @@ export function QuestionEditorModal({
                   rows={5}
                   value={questionText}
                   onChange={(e) => setQuestionText(e.target.value)}
-                  placeholder="Ketik soal di sini. Gunakan $rumus$ untuk rumus inline dan $$rumus$$ untuk rumus tengah. Tabel Markdown juga didukung."
+                  placeholder={isBank ? 'Ketik butir soal di sini. Gunakan $rumus$ untuk rumus inline dan $$rumus$$ untuk rumus tengah. Tabel Markdown juga didukung.' : 'Ketik soal di sini. Gunakan $rumus$ untuk rumus inline dan $$rumus$$ untuk rumus tengah. Tabel Markdown juga didukung.'}
                   className="w-full text-sm p-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
@@ -351,7 +382,7 @@ export function QuestionEditorModal({
                         type="text"
                         value={opt.text}
                         onChange={(e) => updateOptionText(idx, e.target.value)}
-                        placeholder={`Teks pilihan ${opt.key} (contoh: $x = 5$)`}
+                        placeholder={isBank ? `Teks opsi ${opt.key} (contoh: $x = 5$)` : `Teks pilihan ${opt.key} (contoh: $x = 5$)`}
                         className="w-full text-xs px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-brand-500"
                       />
 

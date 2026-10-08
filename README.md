@@ -61,6 +61,23 @@ Server mendeteksi runtime pekerja lewat keberadaan objek `WebSocketPair`. Pada C
 
 ---
 
+## Bank Soal (pemakaian berulang)
+
+Bank soal memisahkan penulisan butir soal dari penyusunan ujian, sehingga satu butir
+soal bisa dipakai pada banyak ujian berbeda tanpa perlu mengetik ulang.
+
+Cara kerjanya:
+
+1. Guru membuat bank soal per mata pelajaran, misalnya "Matematika Kelas 10".
+2. Butir soal ditulis manual lewat editor, atau dihasilkan AI lalu ditinjau sebelum disimpan.
+3. Saat menyusun ujian, guru membuka "Ambil dari Bank Soal" dan memilih butir yang dipakai.
+4. Ujian menyimpan **salinan** butir soal, jadi kalau bank kemudian diperbaiki, ujian
+   yang sudah dikerjakan siswa tidak berubah isinya.
+
+Menu Bank Soal ada pada dashboard guru.
+
+---
+
 ## Cara Menjalankan
 
 ### 1. Prasyarat
@@ -79,29 +96,37 @@ npm run build
 npm run start
 ```
 
-### 4. Akun Default Guru (Demo)
-- **URL Login Guru**: `/teacher/login`
-- **Username**: `guru`
-- **Password**: `guru123`
+### 4. Instalasi pemakaian nyata
 
-### 5. Kode Token Ujian Simulasi
-- **Token Ujian**: `CBT2026`
-- Berisi 5 contoh soal komprehensif: Aljabar KaTeX, Fisika GLBB dengan tabel, Kalkulus Integral, Kimia Stoikiometri, dan Statistika Frekuensi.
+Langkah ini **wajib** dilakukan sebelum sistem dipakai siswa.
 
-### 6. Konfigurasi KiosAPI (AI Generator)
-Masuk ke dashboard guru → Klik tombol **"Pengaturan AI"** di pojok kanan atas:
-- **KiosAPI Secret Key**: Masukkan API Key dari akun KiosAPI Anda.
-- **Base URL**: `https://api.kiosapi.com/v1`
-- **Pilihan Model**: `deepseek-chat`, `deepseek-reasoner`, `gpt-4o-mini`, `gpt-4o`.
+1. **Ganti akun awal.** Berkas `migrations/0002_initial_seed.sql` membuat satu akun
+   sementara dengan username `admin`. Segera setelah basis data dibuat, masuk lewat
+   `/teacher/login`, lalu ganti username dan password tersebut dengan akun milik sekolah.
+
+2. **Hapus materi contoh.** Ujian dan soal contoh yang dibuat saat instalasi bisa
+   dihapus dari dashboard selain yang memang ingin dipertahankan.
+
+3. **Atur kunci KiosAPI.** Buka dashboard guru, klik **"Pengaturan AI"**:
+   - **Kunci KiosAPI**: masukkan kunci milik sekolah
+   - **Base URL**: `https://api.kiosapi.com/v1`
+   - **Model**: `deepseek-chat` (cepat dan murah), `deepseek-reasoner` (untuk soal
+     bertingkat analisis), `gpt-4o-mini`, atau `gpt-4o`
+
+   Kunci disimpan di basis data sekolah sendiri, tidak pernah ikut dalam kode.
+
+4. **Buat token ujian.** Saat membuat ujian, sistem menghasilkan token 6 karakter.
+   Token inilah yang dibagikan ke siswa. Token bisa diganti kapan saja dari dashboard.
+
+### 5. Soal, kunci jawaban, dan pembahasan
+
+Setiap butir soal mendukung rumus matematika, tabel, gambar, serta kunci jawaban dan
+pembahasan. Bagian pembahasan hanya terlihat bila guru mengaktifkan switch
+"Tampilkan Pembahasan" pada pengaturan ujian.
 
 ---
 
 ## Pengujian Otomatis
 
-Jalankan test suite verifikasi:
-```bash
-npx tsx scripts/test-cbt.ts
-```
-
 ---
-*Dibuat oleh Andreas Restuawanta Christwara (`zzdree`).*
+*Dibangun untuk Andreas Restuawanta Christwara (`zzdree`) atas permintaan mitra pengguna.*

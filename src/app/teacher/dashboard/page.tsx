@@ -18,6 +18,7 @@ import {
   EyeOff,
   LogOut,
   AlertCircle,
+  Library,
 } from 'lucide-react';
 import { Exam } from '@/types';
 
@@ -26,6 +27,19 @@ export default function TeacherDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [teacherName, setTeacherName] = useState('');
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('cbt_teacher_user');
+      if (raw) {
+        const parsed = JSON.parse(raw) as { name?: string };
+        if (parsed.name) setTeacherName(parsed.name);
+      }
+    } catch {
+      // identitas hanya untuk tampilan; kegagalan baca tidak boleh memblokir dashboard
+    }
+  }, []);
 
   const fetchExams = async () => {
     setError('');
@@ -81,12 +95,15 @@ export default function TeacherDashboardPage() {
               <h1 className="text-base font-bold text-slate-900 dark:text-slate-100">
                 Dashboard Guru
               </h1>
-              <p className="text-[11px] text-slate-500">Bpk. Andreas R.C., S.T.</p>
+              <p className="text-[11px] text-slate-500">{teacherName || 'Guru'}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            <Button href="/teacher/dashboard/banks" variant="outline" size="sm">
+              <Library className="w-4 h-4" /> Bank Soal
+            </Button>
             <Button href="/teacher/dashboard/settings" variant="outline" size="sm">
               <Settings className="w-4 h-4" /> Pengaturan AI
             </Button>

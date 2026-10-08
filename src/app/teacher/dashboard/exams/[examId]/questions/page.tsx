@@ -8,11 +8,13 @@ import { Badge } from '@/components/ui/Badge';
 import { RichContent } from '@/components/shared/RichContent';
 import { QuestionEditorModal } from '@/components/teacher/QuestionEditorModal';
 import { AIQuestionGeneratorModal } from '@/components/teacher/AIQuestionGeneratorModal';
+import { BankQuestionPickerModal } from '@/components/teacher/BankQuestionPickerModal';
 import { Question } from '@/types';
 import {
   ArrowLeft,
   Plus,
   Sparkles,
+  Library,
   ListChecks,
   Edit,
   Trash2,
@@ -35,6 +37,7 @@ export default function ExamQuestionsPage({ params }: { params: Promise<{ examId
   const [editorOpen, setEditorOpen] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [bankPickerOpen, setBankPickerOpen] = useState(false);
 
   const fetchData = async () => {
     setError('');
@@ -118,10 +121,18 @@ export default function ExamQuestionsPage({ params }: { params: Promise<{ examId
               </p>
             </div>
 
-            {/* Actions: Manual vs AI */}
+            {/* Actions: Manual vs AI vs Bank Soal */}
             <div className="flex flex-wrap gap-2">
               <Button type="button" variant="outline" size="md" onClick={handleCreateManual}>
                 <Plus className="w-4 h-4" /> Soal Manual
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                onClick={() => setBankPickerOpen(true)}
+              >
+                <Library className="w-4 h-4" /> Ambil dari Bank Soal
               </Button>
               <Button
                 type="button"
@@ -272,6 +283,14 @@ export default function ExamQuestionsPage({ params }: { params: Promise<{ examId
         onClose={() => setAiModalOpen(false)}
         examId={examId}
         subject={exam?.subject || ''}
+        onImported={fetchData}
+      />
+
+      {/* Pemilih butir soal dari bank soal */}
+      <BankQuestionPickerModal
+        isOpen={bankPickerOpen}
+        onClose={() => setBankPickerOpen(false)}
+        examId={examId}
         onImported={fetchData}
       />
     </div>
