@@ -111,3 +111,12 @@ CREATE TABLE IF NOT EXISTS settings (
   value TEXT NOT NULL,
   updated_at TEXT DEFAULT (datetime('now', 'localtime'))
 );
+
+-- 9. Table: uploaded_images (gambar soal/opsi disimpan sebagai data URI karena
+--    Cloudflare Workers tidak dapat menulis ke disk)
+CREATE TABLE IF NOT EXISTS uploaded_images (
+  id TEXT PRIMARY KEY,
+  mime_type TEXT NOT NULL,
+  data_url TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now', 'localtime'))
+);

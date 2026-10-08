@@ -33,7 +33,7 @@ Sistem Ujian Online Berbasis Komputer (CBT / Computer-Based Test) modern yang re
 - **Editor Soal Manual Kaya Fitur**:
   - **Equation Helper (KaTeX)**: Tombol shortcut cepat untuk rumus pecahan `\frac{a}{b}`, akar `\sqrt{x}`, pangkat `x^2`, integral `\int`, sigma `\sum`, simbol Yunani `\pi, \alpha, \beta`, matriks, dan reaksi kimia dengan live preview instan.
   - **Table Generator**: Dialog pembuat tabel data berkolom dan berbaris yang otomatis diubah ke tabel responsif (horizontal scroll di HP).
-  - **Dukungan Gambar**: Unggah file gambar lokal (maks 5MB) atau masukkan URL gambar pada narasi soal maupun pilihan jawaban A-E.
+  - **Dukungan Gambar**: Unggah berkas gambar (**maks 500 KB**) atau tempel URL gambar pada narasi soal maupun pilihan jawaban A-E. Berkas hasil unggahan disimpan sebagai data URI di D1, karena Cloudflare Workers tidak boleh menulis ke disk. Untuk gambar lebih besar, gunakan URL berkas yang sudah dihosting di tempat lain.
 - **Generator Soal Otomatis Menggunakan AI (KiosAPI)**:
   - Terintegrasi dengan **KiosAPI** (OpenAI-compatible) menggunakan model **DeepSeek** (`deepseek-chat`, `deepseek-reasoner`) atau **GPT** (`gpt-4o-mini`, `gpt-4o`).
   - Guru menentukan topik materi, tingkat kesulitan (Mudah, Sedang, Sulit, HOTS), jenjang kelas, jumlah soal, dan opsi rumus/tabel.
@@ -50,8 +50,14 @@ Sistem Ujian Online Berbasis Komputer (CBT / Computer-Based Test) modern yang re
 - **Framework**: Next.js 15 (App Router) + React 19 + TypeScript
 - **Styling**: Tailwind CSS + Lucide Icons
 - **Math Rendering**: KaTeX 0.16
-- **Database**: SQLite bawaan Node (`node:sqlite` DatabaseSync), *Zero-config, zero-dependency, instan jalan tanpa instalasi database server eksternal.*
+- **Database**: Cloudflare D1 di produksi (SQLite di tepi), dan SQLite berkas lokal (`node:sqlite`) untuk pengembangan maupun pengetesan offline.
 - **AI Engine**: KiosAPI (REST OpenAI-compatible via `/v1/chat/completions`)
+
+### Cara pemilihan database
+
+Server mendeteksi runtime pekerja lewat keberadaan objek `WebSocketPair`. Pada Cloudflare Worker, binding `env.DB` (D1) dipakai. Pada `next dev` atau `next start` biasa, aplikasi memakai berkas `cbt.db` di lokal, sehingga tidak perlu migrasi tambahan untuk pengembangan.
+
+> Catatan penting: jangan memanggil D1 pada Node biasa tanpa pemeriksaan ini. Di runtime lokal binding D1 tetap terlihat, tetapi ia menunjuk ke emulator yang kosong sehingga setiap kueri gagal dengan `no such table`.
 
 ---
 
