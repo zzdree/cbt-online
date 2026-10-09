@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import bcrypt from 'bcryptjs';
+
+function verifyPassword(plain: string, stored: string): boolean {
+  // Menopang akun lama yang belum di-hash, sambil memakai bcrypt bila memungkinkan
+  if (stored.startsWith('$2a$') || stored.startsWith('$2b$') || stored.startsWith('$2y$')) {
+    try {
+      return bcrypt.compareSync(plain, stored);
+    } catch {
+      return false;
+    }
+  }
+  return stored === plain;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,15 +25,10 @@ export async function POST(req: NextRequest) {
 
     const user = (await db
       .prepare('SELECT id, username, name, role, password_hash FROM users WHERE username = ?')
-      .get(username.trim())) as any;
+      .get(String(username).trim())) as any;
 
-    if (!user) {
-      return NextResponse.json({ error: 'Username atau password salah' }, { status: 401 });
-    }
-
-    const passwordMatch = user.password_hash === password;
-
-    if (!passwordMatch) {
+    // Pesan sengaja sama agar tidak membocorkan username mana yang terdaftar
+    if (!user || !verifyPassword(String(password), user.password_hash)) {
       return NextResponse.json({ error: 'Username atau password salah' }, { status: 401 });
     }
 

@@ -39,3 +39,7 @@ next-env.d.ts
 
 # Database lokal berisi identitas pengguna sungguhan, tidak ikut repo
 cbt.db
+
+# Berkas kredensial uji, tidak boleh masuk repo
+TEST-CREDENTIALS.md
+*.credentials.md

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, use } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -13,8 +14,8 @@ import { Question } from '@/types';
 import {
   ArrowLeft,
   Plus,
-  Sparkles,
   Library,
+  Cpu,
   ListChecks,
   Edit,
   Trash2,
@@ -28,6 +29,7 @@ import {
 export default function ExamQuestionsPage({ params }: { params: Promise<{ examId: string }> }) {
   const resolvedParams = use(params);
   const examId = resolvedParams.examId;
+  const router = useRouter();
 
   const [exam, setExam] = useState<any>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -121,14 +123,14 @@ export default function ExamQuestionsPage({ params }: { params: Promise<{ examId
               </p>
             </div>
 
-            {/* Actions: Manual vs AI vs Bank Soal */}
+            {/* Bank soal adalah jalur utama; AI menjadi alternatif bila bank belum memuat cukup soal */}
             <div className="flex flex-wrap gap-2">
               <Button type="button" variant="outline" size="md" onClick={handleCreateManual}>
-                <Plus className="w-4 h-4" /> Soal Manual
+                <Plus className="w-4 h-4" /> Tulis Manual
               </Button>
               <Button
                 type="button"
-                variant="outline"
+                variant="primary"
                 size="md"
                 onClick={() => setBankPickerOpen(true)}
               >
@@ -136,11 +138,11 @@ export default function ExamQuestionsPage({ params }: { params: Promise<{ examId
               </Button>
               <Button
                 type="button"
-                variant="primary"
+                variant="outline"
                 size="md"
                 onClick={() => setAiModalOpen(true)}
               >
-                <Sparkles className="w-4 h-4 text-amber-300" /> Buat Soal AI (KiosAPI)
+                <Cpu className="w-4 h-4" /> Alternatif: Buat dengan AI
               </Button>
             </div>
           </div>
@@ -166,21 +168,31 @@ export default function ExamQuestionsPage({ params }: { params: Promise<{ examId
           <div className="p-12 text-center text-sm text-slate-500">Memuat bank soal...</div>
         ) : questions.length === 0 ? (
           <Card className="p-12 text-center">
-            <FileQuestion className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+            <Library className="w-12 h-12 text-slate-300 mx-auto mb-3" />
             <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">
               Belum Ada Soal di Ujian Ini
             </h3>
-            <p className="text-xs text-slate-500 mt-1 mb-5">
-              Anda dapat menulis soal secara manual atau membuat draft otomatis menggunakan AI KiosAPI.
+            <p className="text-xs text-slate-500 mt-1.5 mb-5 max-w-md mx-auto leading-relaxed">
+              Cara terbaik: susun soal sekali di <strong>Bank Soal</strong>, lalu ambil dari sana
+              untuk setiap ujian. Dengan begitu soal yang sama tidak perlu ditulis ulang.
             </p>
-            <div className="flex justify-center gap-3">
-              <Button variant="outline" onClick={handleCreateManual}>
-                <Plus className="w-4 h-4" /> Tambah Manual
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button variant="primary" onClick={() => setBankPickerOpen(true)}>
+                <Library className="w-4 h-4" /> Ambil dari Bank Soal
               </Button>
-              <Button variant="primary" onClick={() => setAiModalOpen(true)}>
-                <ListChecks className="w-4 h-4" /> Generate dengan AI
+              <Button variant="outline" onClick={() => router.push('/teacher/dashboard/banks')}>
+                <Plus className="w-4 h-4" /> Buka Bank Soal
+              </Button>
+              <Button variant="outline" onClick={handleCreateManual}>
+                <Plus className="w-4 h-4" /> Tulis Manual
+              </Button>
+              <Button variant="outline" onClick={() => setAiModalOpen(true)}>
+                <Cpu className="w-4 h-4" /> Alternatif: Buat dengan AI
               </Button>
             </div>
+            <p className="text-[11px] text-slate-400 mt-4">
+              AI memakai kuota KiosAPI milik sekolah. Aktifkan hanya bila bank soal belum memuat cukup butir.
+            </p>
           </Card>
         ) : (
           <div className="space-y-4">
